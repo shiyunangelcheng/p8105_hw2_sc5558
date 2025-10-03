@@ -228,35 +228,19 @@ knitr::kable(
   caption = "Top 10 ZIP Codes with Largest Rent Decrease (Jan 2020 → Jan 2021)",
   digits = 2
 )
-
-# Optional: View missing ZIPs
-# knitr::kable(missing_zips)
-
 ```
+## Tidy Dataset Summary 
+The resulting tidy dataset contains `r nrow(nyc_rent_df)` monthly observations of the Zillow Observed Rent Index (ZORI) for ZIP codes across New York City, covering the time span from January 2015 to August 2024. The dataset includes `r n_distinct(nyc_rent_df$zip_code)` unique ZIP codes and `r n_distinct(nyc_rent_df$neighborhood)` unique neighborhoods, each associated with a county (borough), a date, and a rent index value. This structure enables easy comparison across time and location.
+## Zip codes missing from Zillow's Dataset
+A small number of Zip codes in the ZIP dataset are missing in the dataset, example include:
 ```{r}
-covid_drop =
-  nyc_rent_df |>
-  filter(ym %in% c("2020_01", "2021_01")) |>
-  select(zip_code, county, neighborhood, ym, rent_index) |>
-  group_by(zip_code, county, neighborhood, ym) |>
-  summarise(
-    rent_index = mean(rent_index, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  pivot_wider(
-    names_from = ym,
-    values_from = rent_index,
-    names_prefix = "rent_"
-  ) |>
-  janitor::clean_names() |>
-  mutate(change = rent_2021_01 - rent_2020_01) |>
-  arrange(change) |>
-  slice(1:10)
-
-knitr::kable(
-  covid_drop,
-  caption = "Top 10 ZIP Codes with Largest Rent Decrease (Jan 2020 → Jan 2021)",
-  digits = 2
-)
+knitr::kable(head(missing_zips, 5), caption = "Example ZIP Codes Missing from Zillow Dataset")
 ```
+These zipcodes may be excluded for several reasons: some represent industrial zones, or some are outside NYC boundaries. 
+## Covid 19 Rent Drops 
+To examine COVID-related rental price shifts, we compared ZORI values in January 2020 and January 2021 across ZIP codes. The following table shows the 10 ZIP codes with the largest drops in rental prices:
+```{r}
+knitr::kable(covid_drop, caption = "Top 10 ZIP Codes with Largest Rent Decrease (Jan 2020 → Jan 2021)", digits = 2)
 
+```
+These ZIP codes are primarily in Manhattan (New York County), including neighborhoods such as Lower Manhattan, Gramercy Park, and Chelsea. In these areas, rent prices fell by approximately $670 to over $900 per month. This dramatic decline reflects the COVID-19 pandemic’s impact on urban housing demand, as remote work, outmigration, and temporary closures led to reduced demand for centrally located rental units
